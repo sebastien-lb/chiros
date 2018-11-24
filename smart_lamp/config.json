@@ -1,0 +1,22 @@
+{
+    "name": "coolObject",
+    "type": "lamp",
+    "actions": [
+        {
+            "name": "on",
+            "command": "/on"
+        },
+        {
+            "name": "off",
+            "command": "/off"
+        }
+    ],
+    "data-source": [
+        {
+            "name": "state",
+            "description": "return the state",
+            "path": "/state",
+            "type": "boolean"
+        }
+    ]
+}
