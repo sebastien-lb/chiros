@@ -4,7 +4,7 @@ from datetime import datetime
 from os import listdir, system
 
 from flask import Flask, jsonify
-from flask.ext.cors import CORS
+from flask_cors import CORS
 
 DEVICE_FOLDER = "/sys/bus/w1/devices/"
 DEVICE_SUFFIX = "/w1_slave"
