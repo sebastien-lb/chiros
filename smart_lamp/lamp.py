@@ -7,7 +7,7 @@ led = LED(14)
 
 @app.route('/config')
 def config():
-    return response()
+    return getConfigResponse()
 
 
 @app.route('/state')
@@ -61,20 +61,16 @@ def off():
 
     return response
 
-def response():
+def getConfigResponse():
     data = {}
     with open("config.json") as file:
         data = json.loads(file.read())
-
         print(data)
-
-
         response = app.response_class(
             response=json.dumps(data),
             status=200,
             mimetype='application/json'
         )
-
         return response
 
     response = app.response_class(
