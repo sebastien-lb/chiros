@@ -15,8 +15,9 @@
         {
             "name": "state",
             "description": "return the state",
-            "path": "/state",
-            "type": "boolean"
+            "endpoint": "/state",
+            "data-type": "boolean",
+            "data-polling-type": "ON_REQUEST"
         }
     ]
 }
