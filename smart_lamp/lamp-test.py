@@ -1,5 +1,8 @@
 from flask import Flask, json
-from time import sleep
+import time
+from threading import Thread
+import schedule
+import requests
 
 app = Flask(__name__)
 
@@ -79,5 +82,32 @@ def getConfigResponse():
 
     return response
 
+@app.route('/read', methods=["POST"])
+def read():
+    schedule.every(3).seconds.do(send_status).tag('read')
+    return app.response_class(status=200)
+
+
+@app.route('/read', methods=["DELETE"])
+def stopRead():
+    schedule.clear('read')
+    return app.response_class(status=200)
+
+
+def send_status():
+    state = json.loads("state.json")
+    server = json.loads("server.json")
+    data = json.dumps(state["value"])
+    requests.post(server["url"] + ":" + server["port"] + "/entryPoint/" + server["id"], data=data )
+    return app.response_class(status=200)
+
+def runJobs():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
 if __name__=='__main__':
+    cron_thread = Thread(target=runJobs)
+    cron_thread.start()
     app.run()
