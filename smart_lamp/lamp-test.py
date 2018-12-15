@@ -1,8 +1,10 @@
-from flask import Flask, json
 import time
-from threading import Thread
 import schedule
 import requests
+import sys
+
+from flask import Flask, json
+from threading import Thread
 
 app = Flask(__name__)
 
@@ -24,6 +26,23 @@ def state():
 
     return response
 
+@app.route('/switch', methods=['POST'])
+def switch():
+    data = {}
+    with open("state.json", "r") as file:
+        data = json.loads(file.read())
+
+    data['value'] = 1 - data['value']
+
+    with open("state.json", "w") as file:
+        file.write(json.dumps(data))
+
+    response = app.response_class(
+        "status: {}".format(data['value']),
+        status=200
+    )
+
+    return response
 
 @app.route('/on')
 def on():
@@ -110,4 +129,6 @@ def runJobs():
 if __name__=='__main__':
     cron_thread = Thread(target=runJobs)
     cron_thread.start()
+    port = 5000 if not(len(sys.argv)>1) else int(sys.argv[1])
+    app.run(port=port)
     app.run()

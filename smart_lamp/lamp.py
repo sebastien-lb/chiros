@@ -23,7 +23,6 @@ def state():
 
     return response
 
-
 @app.route('/on')
 def on():
     data = {}
