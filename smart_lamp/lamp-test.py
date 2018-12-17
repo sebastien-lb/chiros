@@ -3,7 +3,7 @@ import schedule
 import requests
 import sys
 
-from flask import Flask, json
+from flask import Flask, json, request
 from threading import Thread
 
 app = Flask(__name__)
@@ -12,6 +12,24 @@ app = Flask(__name__)
 def config():
     return getConfigResponse()
 
+@app.route('/serverConfig', methods=['POST'])
+def setServerConfig():
+    print(request)
+    print(request.get_json(force=True))
+    data = request.get_json(force=True)
+    print(data)
+    server_config = {}
+    server_config["url"] = data.get("url")
+    server_config["id"] = data.get("id")
+    server_config["port"] = data.get("port")
+    server_config["data-source-ids"] = data.get("data-source-ids")
+    with open("server.json", "w") as file:
+        file.write(json.dumps(server_config))
+
+    response = app.response_class(
+        status=200
+    )
+    return response
 
 @app.route('/state')
 def state():
@@ -114,10 +132,16 @@ def stopRead():
 
 
 def send_status():
-    state = json.loads("state.json")
-    server = json.loads("server.json")
-    data = json.dumps(state["value"])
-    requests.post(server["url"] + ":" + server["port"] + "/entryPoint/" + server["id"], data=data )
+    with open("state.json", "r") as file:
+        state = json.loads(file.read())
+        data = json.dumps(state["value"])
+
+    with open("server.json", "r") as file:
+        server = json.loads(file.read())
+
+    requests.post("http://" + server["url"] + ":" + server["port"] + "/entryPoint/" + server["id"], data=data,
+        headers={'Content-type': 'application/json'})
+
     return app.response_class(status=200)
 
 def runJobs():
