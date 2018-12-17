@@ -14,15 +14,17 @@ def config():
 
 @app.route('/serverConfig', methods=['POST'])
 def setServerConfig():
-    print(request)
-    print(request.get_json(force=True))
-    data = request.get_json(force=True)
-    print(data)
-    server_config = {}
-    server_config["url"] = data.get("url")
-    server_config["id"] = data.get("id")
-    server_config["port"] = data.get("port")
-    server_config["data-source-ids"] = data.get("data-source-ids")
+    try:
+        data = request.get_json(force=True)
+        server_config = {}
+        server_config["url"] = data.get("url")
+        server_config["id"] = data.get("id")
+        server_config["port"] = data.get("port")
+        server_config["data-source-ids"] = data.get("data-source-ids")
+    except:
+        return app.response_class(status=400)
+
+    
     with open("server.json", "w") as file:
         file.write(json.dumps(server_config))
 
