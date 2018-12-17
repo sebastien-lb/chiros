@@ -1,0 +1,14 @@
+{
+    "name": "coolObject",
+    "type": "thermometer",
+    "actions": [],
+    "data-source": [
+        {
+            "name": "temperature",
+            "description": "return the temperature",
+            "endpoint": "/temperature",
+            "data-type": "number",
+            "data-polling-type": "NOTIFICATION"
+        }
+    ]
+}
