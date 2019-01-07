@@ -3,6 +3,16 @@
     "type": "lamp",
     "actions": [
         {
+            "name": "switch",
+            "command": "/switch",
+            "payloads": [
+                {
+                    "name": "switch",
+                    "type": "boolean"
+                }
+            ]
+        },
+        {
             "name": "on",
             "command": "/on"
         },
