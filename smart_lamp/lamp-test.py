@@ -57,6 +57,7 @@ def switch():
     with open("state.json", "w") as file:
         file.write(json.dumps(data))
 
+    send_status()
     response = app.response_class(
         "status: {}".format(data['value']),
         status=200
@@ -64,7 +65,7 @@ def switch():
 
     return response
 
-@app.route('/on')
+@app.route('/on', methods=['POST'])
 def on():
     data = {}
     with open("state.json", "r") as file:
@@ -76,6 +77,7 @@ def on():
     with open("state.json", "w") as file:
         file.write(json.dumps(data))
 
+    send_status()
     response = app.response_class(
         status=200
     )
@@ -83,7 +85,7 @@ def on():
     return response
 
 
-@app.route('/off')
+@app.route('/off', methods=['POST'])
 def off():
     data = {}
     with open("state.json", "r") as file:
@@ -95,6 +97,7 @@ def off():
     with open("state.json", "w") as file:
         file.write(json.dumps(data))
 
+    send_status()
     response = app.response_class(
         status=200
     )
@@ -134,15 +137,22 @@ def stopRead():
 
 
 def send_status():
+    data = {}
+    print("Sending Status")
     with open("state.json", "r") as file:
         state = json.loads(file.read())
-        data = json.dumps(state["value"])
+        data["value"] = int(json.dumps(state["value"]))
 
     with open("server.json", "r") as file:
         server = json.loads(file.read())
+        data_source_id = server["data-source-ids"]["state"]
+        data["data_source_id"] = data_source_id
 
-    requests.post("http://" + server["url"] + ":" + server["port"] + "/entryPoint/" + server["id"], data=data,
+    print("Status sent")
+    r = requests.post("http://" + server["url"] + ":" + server["port"] + "/saveDataPoint", data=json.dumps(data),
         headers={'Content-type': 'application/json'})
+
+    print("response datasaved", r.text, data)
 
     return app.response_class(status=200)
 
