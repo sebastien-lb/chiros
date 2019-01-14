@@ -2,11 +2,49 @@ import time
 import schedule
 import requests
 import sys
-
 from flask import Flask, json, request
 from threading import Thread
 
+import system_handler as handler
+
+if handler.is_raspberry_pi():
+    print('Launching in Raspberry Pi mode.')
+    from gpiozero import LED
+else:
+    print('Launching test mode.')
+
+    class LED:
+        """
+        This class allow for tests on systems that are not a Raspberry Pi.
+        """
+        def __init__(self, pin, is_lit = False):
+            self._value = is_lit
+            self._pin = pin
+
+        def on(self):
+            self._value = True
+            print('Lamp was turned on.')
+
+        def off(self):
+            self._value = False
+            print('Lamp was turned off.')
+
+        @property
+        def value(self):
+            return self._value
+
+        @property
+        def pin(self):
+            return self._pin
+
+led = LED(14)
+
+
+
+
+
 app = Flask(__name__)
+
 
 @app.route('/config')
 def config():
@@ -53,6 +91,10 @@ def switch():
         data = json.loads(file.read())
 
     data['value'] = 1 - data['value']
+    if data['value']:
+        led.on()
+    else:
+        led.off()
 
     with open("state.json", "w") as file:
         file.write(json.dumps(data))
@@ -72,7 +114,7 @@ def on():
         data = json.loads(file.read())
 
     data['value'] = 1
-    # led.on()
+    led.on()
 
     with open("state.json", "w") as file:
         file.write(json.dumps(data))
@@ -92,7 +134,7 @@ def off():
         data = json.loads(file.read())
 
     data['value'] = 0
-    # led.off()
+    led.off()
 
     with open("state.json", "w") as file:
         file.write(json.dumps(data))
