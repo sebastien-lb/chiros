@@ -1,0 +1,24 @@
+{
+    "name": "coolLed",
+    "type": "led",
+    "actions": [
+        {
+            "name": "on",
+            "command": "/on",
+            "payload": "string"
+        },
+        {
+            "name": "off",
+            "command": "/off"
+        }
+    ],
+    "data-source": [
+        {
+            "name": "state",
+            "description": "current RGB status",
+            "endpoint": "/state",
+            "data-type": "string",
+            "data-polling-type": "ON_REQUEST"
+        }
+    ]
+}
