@@ -29,4 +29,8 @@ pip install -r requirements.txt
 python your_file.py
 ```
 
+# Chiros esp32
 
+C++ version compatible with esp32 using the Arduino framework :
+
+> https://github.com/wesfox/chiros-esp32
