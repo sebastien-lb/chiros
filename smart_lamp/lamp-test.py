@@ -39,10 +39,6 @@ else:
 
 led = LED(14)
 
-
-
-
-
 app = Flask(__name__)
 
 
