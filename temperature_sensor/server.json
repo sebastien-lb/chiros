@@ -1,8 +1,1 @@
-{
-    "data-source-ids": {
-        "temperature": ""
-    },
-    "id": "",
-    "port": "",
-    "url": ""
-}
+{"data-source-ids": {"temperature": "547c2cb7-36bb-4a9d-b3ea-96405be93b0b"}, "id": "e3725817-5729-4b19-8fda-6b52597b8232", "port": "8000", "url": "127.0.0.1"}

@@ -76,7 +76,10 @@ else:
 
 
 def send_status():
-    data = read_temperature()
+    data = {}
+    # for now we only send the temp without the celsius
+    data["value"] = read_temperature()["celsius"]
+    print("Sending Status")
 
     with open("server.json", "r") as file:
         server = json.loads(file.read())
@@ -84,6 +87,8 @@ def send_status():
 
     requests.post("http://" + server["url"] + ":" + server["port"] + "/saveDataPoint", data=json.dumps(data),
                   headers={'Content-type': 'application/json'})
+    
+    print("Sending Sent ", data["data_source_id"])    
 
     return app.response_class(status=200)
 
@@ -155,6 +160,7 @@ def runJobs():
 if __name__ == '__main__':
     cron_thread = Thread(target=runJobs)
     cron_thread.start()
+    schedule.every(60).seconds.do(send_status).tag('read')
     port = 5000 if not(len(sys.argv)>1) else int(sys.argv[1])
     app.run(port=port)
     app.run()
