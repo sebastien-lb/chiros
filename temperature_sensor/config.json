@@ -1,5 +1,5 @@
 {
-    "name": "coolObject",
+    "name": "Smart Thermometer",
     "type": "thermometer",
     "actions": [],
     "data-source": [
@@ -8,7 +8,7 @@
             "description": "return the temperature",
             "endpoint": "/temperature",
             "data-type": "number",
-            "data-polling-type": "NOTIFICATION"
+            "data-polling-type": "ON_PUSH"
         }
     ]
 }

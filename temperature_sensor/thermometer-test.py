@@ -109,8 +109,8 @@ def setServerConfig():
     )
     return response
 
-@app.route('/state')
-def state():
+@app.route('/temperature')
+def temperature():
     data = read_temperature()
 
     response = app.response_class(
