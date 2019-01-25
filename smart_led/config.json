@@ -5,7 +5,7 @@
         {
             "name": "on",
             "command": "/on",
-            "payload": "string"
+            "payload": "color"
         },
         {
             "name": "off",
@@ -17,7 +17,7 @@
             "name": "state",
             "description": "current RGB status",
             "endpoint": "/state",
-            "data-type": "string",
+            "data-type": "color",
             "data-polling-type": "ON_REQUEST"
         }
     ]
