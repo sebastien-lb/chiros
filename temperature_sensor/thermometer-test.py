@@ -12,67 +12,82 @@ import system_handler as handler
 
 app = Flask(__name__)
 
-if handler.is_raspberry_pi():
-    print('Launching in Raspberry Pi mode.')
-    DEVICE_FOLDER = "/sys/bus/w1/devices/"
-    DEVICE_SUFFIX = "/w1_slave"
-    WAIT_INTERVAL = 0.2
+def launch_temp_sensor(sensor_type):
+    print('Launching sensor type:' + sensor_type)
+    if handler.is_raspberry_pi():
+        print('Launching in Raspberry Pi mode.')
 
-    ALLOWABLE_ORIGINS = ["https://freeboard.io"]
-    system('modprobe w1-gpio')
-    system('modprobe w1-therm')
+        if sensor_type == "simple" :
+            print('Sensor type : simple')
+            DEVICE_FOLDER = "/sys/bus/w1/devices/"
+            DEVICE_SUFFIX = "/w1_slave"
+            WAIT_INTERVAL = 0.2
 
-    devices = listdir(DEVICE_FOLDER)
-    devices = [device for device in devices if device.startswith('28-')]
-    if devices:
-        device = DEVICE_FOLDER + devices[0] + DEVICE_SUFFIX
+            ALLOWABLE_ORIGINS = ["https://freeboard.io"]
+            system('modprobe w1-gpio')
+            system('modprobe w1-therm')
+
+            devices = listdir(DEVICE_FOLDER)
+            devices = [device for device in devices if device.startswith('28-')]
+            if devices:
+                device = DEVICE_FOLDER + devices[0] + DEVICE_SUFFIX
+            else:
+                sys.exit("Sorry, no temperature sensors found")
+
+
+            def raw_temperature():
+                """
+                Get a raw temperature reading from the temperature sensor
+                """
+                raw_reading = None
+                with open(device, 'r') as sensor:
+                    raw_reading = sensor.readlines()
+                return raw_reading
+
+
+            def read_temperature():
+                """
+                Keep trying to read the temperature from the sensor until
+                it returns a valid result
+                """
+                lines = raw_temperature(device)
+
+                # Keep retrying till we get a YES from the thermometer
+                # 1. Make sure that the response is not blank
+                # 2. Make sure the response has at least 2 lines
+                # 3. Make sure the first line has a "YES" at the end
+                while not lines and len(lines) < 2 and lines[0].strip()[-3:] != 'YES':
+                    # If we haven't got a valid response, wait for the WAIT_INTERVAL
+                    # (seconds) and try again.
+                    time.sleep(WAIT_INTERVAL)
+                    lines = raw_temperature()
+
+                # Split out the raw temperature number
+                temperature = lines[1].split('t=')[1]
+
+                # Check that the temperature is not invalid
+                if temperature != -1:
+                    temperature_celsius = round(float(temperature) / 1000.0, 1)
+
+                response = {'celsius': temperature_celsius}
+                return response
+
+        elif sensor_type == "adafruit":
+            print('Sensor type : adafruit')
+            import Adafruit_DHT
+
+            def read_temperature():
+                # Keep trying to read from the sensor until valid response
+                humidity, temperature = Adafruit_DHT.read_retry(11, 4)
+                # if temperature != -1:
+                #     temperature_celsius = temperature
+                return {'celsius': temperature}
+
     else:
-        sys.exit("Sorry, no temperature sensors found")
+        print('Launching test mode.')
 
-
-    def raw_temperature():
-        """
-        Get a raw temperature reading from the temperature sensor
-        """
-        raw_reading = None
-        with open(device, 'r') as sensor:
-            raw_reading = sensor.readlines()
-        return raw_reading
-
-
-    def read_temperature():
-        """
-        Keep trying to read the temperature from the sensor until
-        it returns a valid result
-        """
-        lines = raw_temperature(device)
-
-        # Keep retrying till we get a YES from the thermometer
-        # 1. Make sure that the response is not blank
-        # 2. Make sure the response has at least 2 lines
-        # 3. Make sure the first line has a "YES" at the end
-        while not lines and len(lines) < 2 and lines[0].strip()[-3:] != 'YES':
-            # If we haven't got a valid response, wait for the WAIT_INTERVAL
-            # (seconds) and try again.
-            time.sleep(WAIT_INTERVAL)
-            lines = raw_temperature()
-
-        # Split out the raw temperature number
-        temperature = lines[1].split('t=')[1]
-
-        # Check that the temperature is not invalid
-        if temperature != -1:
-            temperature_celsius = round(float(temperature) / 1000.0, 1)
-
-        response = {'celsius': temperature_celsius}
-        return response
-
-
-else:
-    print('Launching test mode.')
-
-    def read_temperature():
-        return {"celsius": 20 + 2*cos(time.time() / 30)}
+        def read_temperature():
+            return {"celsius": 20 + 2*cos(time.time() / 30)}
 
 
 def send_status():
@@ -160,7 +175,9 @@ def runJobs():
 if __name__ == '__main__':
     cron_thread = Thread(target=runJobs)
     cron_thread.start()
-    schedule.every(60).seconds.do(send_status).tag('read')
+    schedule.every(10).seconds.do(send_status).tag('read')
     port = 5000 if not(len(sys.argv)>1) else int(sys.argv[1])
-    app.run(port=port)
-    app.run()
+    sensor_type = "adafruit" if not(len(sys.argv)>2) else sys.argv[2]
+    launch_temp_sensor(sensor_type)
+    app.run(port=port, host='0.0.0.0')
+    # app.run()
