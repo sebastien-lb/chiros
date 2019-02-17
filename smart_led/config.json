@@ -5,7 +5,8 @@
         {
             "name": "on",
             "command": "/on",
-            "payload": "color"
+            "payload": "color",
+            "important": true
         },
         {
             "name": "off",

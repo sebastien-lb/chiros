@@ -58,8 +58,8 @@ def setServerConfig():
     except:
         return app.response_class(status=400)
 
-    
-    with open("server.json", "w") as file:
+
+    with open("server/server.json", "w") as file:
         file.write(json.dumps(server_config))
 
     response = app.response_class(
@@ -181,7 +181,7 @@ def send_status():
         state = json.loads(file.read())
         data["value"] = int(json.dumps(state["value"]))
 
-    with open("server.json", "r") as file:
+    with open("server/server.json", "r") as file:
         server = json.loads(file.read())
         data_source_id = server["data-source-ids"]["state"]
         data["data_source_id"] = data_source_id
@@ -204,5 +204,4 @@ if __name__=='__main__':
     cron_thread = Thread(target=runJobs)
     cron_thread.start()
     port = 5000 if not(len(sys.argv)>1) else int(sys.argv[1])
-    app.run(port=port)
-    app.run()
+    app.run(port=port, host='0.0.0.0')
