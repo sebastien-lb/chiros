@@ -10,7 +10,8 @@
                     "name": "switch",
                     "type": "boolean"
                 }
-            ]
+            ],
+            "important": true
         },
         {
             "name": "on",

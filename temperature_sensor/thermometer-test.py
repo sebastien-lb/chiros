@@ -81,14 +81,15 @@ def send_status():
     data["value"] = read_temperature()["celsius"]
     print("Sending Status")
 
-    with open("server.json", "r") as file:
-        server = json.loads(file.read())
-        data["data_source_id"] = server["data-source-ids"]["temperature"]
+    try:
+        with open("server/server.json", "r") as file:
+            server = json.loads(file.read())
+            data["data_source_id"] = server["data-source-ids"]["temperature"]
 
-    requests.post("http://" + server["url"] + ":" + server["port"] + "/saveDataPoint", data=json.dumps(data),
-                  headers={'Content-type': 'application/json'})
-    
-    print("Sending Sent ", data["data_source_id"])    
+        requests.post("http://" + server["url"] + ":" + server["port"] + "/saveDataPoint", data=json.dumps(data),
+                    headers={'Content-type': 'application/json'})
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
 
     return app.response_class(status=200)
 
@@ -106,7 +107,7 @@ def setServerConfig():
         return app.response_class(status=400)
 
 
-    with open("server.json", "w") as file:
+    with open("server/server.json", "w") as file:
         file.write(json.dumps(server_config))
 
     response = app.response_class(
@@ -160,7 +161,6 @@ def runJobs():
 if __name__ == '__main__':
     cron_thread = Thread(target=runJobs)
     cron_thread.start()
-    schedule.every(60).seconds.do(send_status).tag('read')
+    schedule.every(20).seconds.do(send_status).tag('read')
     port = 5000 if not(len(sys.argv)>1) else int(sys.argv[1])
-    app.run(port=port)
-    app.run()
+    app.run(port=port, host='0.0.0.0')

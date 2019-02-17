@@ -1,5 +1,6 @@
 from flask import Flask, json, request
 import requests
+import sys
 
 app = Flask(__name__)
 
@@ -89,7 +90,7 @@ def send_status():
         state = json.loads(file.read())
         data["value"] = json.dumps(state)
 
-    with open("server.json", "r") as file:
+    with open("server/server.json", "r") as file:
         server = json.loads(file.read())
         data_source_id = server["data-source-ids"]["state"]
         data["data_source_id"] = data_source_id
@@ -114,7 +115,7 @@ def setServerConfig():
         return app.response_class(status=400)
 
 
-    with open("server.json", "w") as file:
+    with open("server/server.json", "w") as file:
         file.write(json.dumps(server_config))
 
     response = app.response_class(
@@ -123,4 +124,5 @@ def setServerConfig():
     return response
 
 if __name__=='__main__':
-    app.run()
+    port = 5000 if not(len(sys.argv)>1) else int(sys.argv[1])
+    app.run(port=port, host='0.0.0.0')
