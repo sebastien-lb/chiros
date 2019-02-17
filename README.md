@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 *Utilization*
 ```
-python your_file.py
+python your_file.py [port]
 ```
 
 # Chiros esp32
